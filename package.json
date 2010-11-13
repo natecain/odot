@@ -3,4 +3,5 @@
   "version" : "0.1.1",
   "author" : "Thomas Smith <node@thomassmith.com>",
   "main" : "./lib",
+  "engines" : { "node" : ">=0.2.4" }
 }
