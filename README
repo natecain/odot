@@ -1,0 +1,246 @@
+DESCRIPTION
+
+odot is a very simple in-memory object database with dynamic code reloading,
+persistence in a git-friendly format, and an interactive prompt.  The primary
+use is extended exploratory coding with a persistent object space.  The only
+dependency is Node (nodejs.org).
+
+This grew out of some exploratory coding I was doing and turned into something
+that may be useful to people who like to code interactively without
+restarting the Node process or repl and want to preserve the code and data
+being written/manipulated in source and data files suitable for further use.
+Think of it as an interactive prompt along side your code editor wired into
+your code as it is being written.
+
+
+
+EXAMPLE
+
+Three files (in example/ directory, see below for explanations):
+
+trains.js - Script setting up a trains database in interactive mode
+train.js - Script of default vars and functions for train prototype
+station.js - Script of default vars and functions for station prototype
+
+
+First session:
+
+$ node example/trains.js
+> alpha = new o.Station('alpha')
+> beta = new o.Station('beta')
+> beta.mile = 60 
+> regular = new o.Train('regular')
+> console.log(regular.speed) => 10 (default specified in train.js))
+> express = new o.Train('express')
+> express.speed = 20 
+> regular.station = alpha // train.js specifies one train->station relation
+> express.station = alpha
+> express.travel(beta) => "express now at beta after 3 hours travel"
+> // Make change to train.js to change travel() function output
+> recode() // Dynamically reloads code from train.js and station.js
+> regular.travel(beta) => "regular goes to beta, travel time 6 hours"
+> <Ctrl-C> // Automatic persistence on exit to o.json file in working directory
+
+
+Second session:
+
+$ node example/trains.js
+> // Automatic load of database from o.json file in working directory
+> beta = o.station.beta // or o.station['beta']
+> console.log(beta.distance) => 60 // Data is preserved
+> console.log(beta.train[0].id) => 'express' // Many relation station->train
+> regular = o.train.regular
+> console.log(regular.station.id) => 'beta' // One relation train->station
+> regular.speed = 15
+> reset() // Resets entire database back to last save point or state at load
+> regular = o.train.regular // Remember to re-reference to get reset state
+> console.log(regular.speed) => 10
+> regular.speed = 15
+> save() // Persists current state of databse (like a commit)
+> reset() // Resets to the last save point, which was after speed set to 15 
+> regular = o.train.regular
+> console.log(regular.speed) => 15
+> <Ctrl-C>
+
+
+Third session:
+
+$ node example/trains.js
+> console.log(o.train.regular.speed) => 15
+> <Ctrl-C>
+
+
+
+INSTALLATION
+
+Clone this repository with git or download the latest version using the GitHub
+repository Downloads link. Use as a standard Node module by requiring the
+odot directory.
+
+If you use npm:
+
+npm install odot
+
+
+
+DB SCRIPT
+
+You must write a script to define your database.
+
+First, import the odot module:
+
+var odot = require('../odot') // Use just 'odot' if installed with npm
+    map = odot.map;
+
+
+For each key in your database, provide the path of a prototype script:
+
+map('train', 'train.js');
+map('station', 'station.js');
+
+
+Finally, tell Node to load the db and enter the interactive repl prompt (see
+WITHOUT PROMPT for how to use the database without a repl prompt).
+
+odot.repl()
+
+
+
+PROTOTYPE SCRIPTS
+
+Prototype scripts define the default varables and functions of prototypes.
+Prototypes undergird all the objects of particular keys in your database. A
+very basic script example (station.js):
+
+var mile = 0;  // Set default value of all objects of this prototype to 0
+
+many('train');  // Create a many relationship with one or more trains
+
+function name() { // Custom function for printing out station name
+    return 'station ' + this.id + ' at ' + this.mile;
+}
+
+
+All variables and functions defined become those of the prototype. Special
+function calls allow you to setup relations with objects of other keys in the
+database (see RELATIONS below).
+
+Prototype scripts are dynamic. You can continue editing them even while the
+node process and/or prompt is up. When you want the latest code from your
+prototype loaded into your node process, use the recode() method. This will
+load the latest code from all your prototype scripts into the prototypes
+undergirding the objects in your database, giving the objects new defaults and
+behaviors without restarting the process.
+
+
+
+RELATIONS
+
+You can manually add functions to your prototype scripts to reference objects
+of other keys in your database. However, since this is a common pattern,
+convenience prototype setup methods are provided to let you define 'one' or
+'many' relations.
+
+For example, in train.js:
+
+one('station')
+
+
+Gives all train objects a station member that is transparently set or accessed
+by:
+
+regular = new o.Train('regular')
+alpha = new o.Station('alpha')
+regular.station = alpha
+regular.station // => alpha
+
+
+You can also define a relation to one or more objects of another key. For
+example, in station.js:
+
+many('train')
+
+
+Gives all station objects a train member that is an array of train bjects:
+
+regular = new o.Train('regular')
+express = new o.Train('express')
+alpha = new o.Station('alpha')
+alpha.train = [regular, express]
+alpha.train // => [regular, express]
+
+
+The array of returned is a real JavaScript array that is created at the time of
+call, therefore you can use the full set of array methods on it, but anything
+you do to the array does not affect the actual relations held by the object. To
+add or remove trains individually from the station's many relation:
+
+slow = new o.Train('slow');
+alpha.add(slow)
+alpha.train // => [regular, express, slow]
+alpha.remove(express)
+alpha.train // => [regular, slow]
+
+
+Relationships are not automatically managed bi-directionally, so you must make
+corresponding changes on the other objects if you want the relations to be
+bi-directional: 
+
+alpha.remove(regular) // Removes train from station, but not station from train
+regular.station = null // Totally clears either a one or many relation on train
+alpha.train // => [slow]
+regular.station // => null
+
+
+All relations are persisted. There are no automatic pluralizations of keys,
+even in the many case. Any prototype can define as many one and many relations
+as desired. add() and remove() work even when multiple many relations are
+defined.
+
+
+
+DB FILE
+
+The database file used to persist the database object state is a simple JSON
+file. It uses indenting and newlines to make it easy to read, edit, diff, and
+store with source control systems like svn and git.
+
+
+
+WITHOUT PROMPT
+
+If you do not want to start an interactive repl prompt, but want to use a
+odot database from a Node applicaton, use this in your application instead of
+odot.repl():
+
+var o = odot.load();
+
+
+No prompt will appear, but otherwise the API is exacly the same as demonstrated
+for the repl interactive prompt.
+
+
+
+SECURITY
+
+All mapped code is assumed to be fully trusted. Do not place third party code
+into your prototypes without reviewing it. Database files are written to the
+working directory per the umask of your user and are therefore subject to
+access by other users according to file system permissions.
+
+
+
+OTHER APPROACHES
+
+There are other approaches to quick, in-process databases for Node you should
+consider if you want document-orientatation rather than object-orientation and
+other features like append-only disk logs, including:
+
+* nstore (https://github.com/creationix/nStore)
+* node-dirty (https://github.com/felixge/node-dirty)
+
+
+
+FEEDBACK
+
+Feedback welcome at node@thomassmith.com or the Node mailing list.
