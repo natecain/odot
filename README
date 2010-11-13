@@ -93,7 +93,7 @@ var odot = require('../odot') // Use just 'odot' if installed with npm
     map = odot.map;
 
 
-For each key in your database, provide the path of a prototype script:
+For each collection in your database, provide the path of a prototype script:
 
 map('train', 'train.js');
 map('station', 'station.js');
@@ -109,7 +109,7 @@ odot.repl()
 PROTOTYPE SCRIPTS
 
 Prototype scripts define the default varables and functions of prototypes.
-Prototypes undergird all the objects of particular keys in your database. A
+Prototypes undergird all the objects of particular collections in your database. A
 very basic script example (station.js):
 
 var mile = 0;  // Set default value of all objects of this prototype to 0
@@ -122,22 +122,22 @@ function name() { // Custom function for printing out station name
 
 
 All variables and functions defined become those of the prototype. Special
-function calls allow you to setup relations with objects of other keys in the
+function calls allow you to setup relations with objects of other collections in the
 database (see RELATIONS below).
 
-Prototype scripts are dynamic. You can continue editing them even while the
-node process and/or prompt is up. When you want the latest code from your
-prototype loaded into your node process, use the recode() method. This will
-load the latest code from all your prototype scripts into the prototypes
-undergirding the objects in your database, giving the objects new defaults and
-behaviors without restarting the process.
+Prototype scripts are dynamic. You can continue editing them while the node
+process and/or prompt is up, then, when you want the latest code loaded into
+your node process, use the recode() method. This will load the latest code from
+all your prototype scripts into the prototypes undergirding the objects in your
+database, giving the objects new defaults and behaviors without restarting the
+process.
 
 
 
 RELATIONS
 
 You can manually add functions to your prototype scripts to reference objects
-of other keys in your database. However, since this is a common pattern,
+of other collections in your database. However, since this is a common pattern,
 convenience prototype setup methods are provided to let you define 'one' or
 'many' relations.
 
@@ -155,13 +155,13 @@ regular.station = alpha
 regular.station // => alpha
 
 
-You can also define a relation to one or more objects of another key. For
+You can also define a relation to one or more objects of another collection. For
 example, in station.js:
 
 many('train')
 
 
-Gives all station objects a train member that is an array of train bjects:
+Gives all station objects a train member that is an array of train objects:
 
 regular = new o.Train('regular')
 express = new o.Train('express')
@@ -170,7 +170,7 @@ alpha.train = [regular, express]
 alpha.train // => [regular, express]
 
 
-The array of returned is a real JavaScript array that is created at the time of
+The array returned is a real JavaScript array that is created at the time of
 call, therefore you can use the full set of array methods on it, but anything
 you do to the array does not affect the actual relations held by the object. To
 add or remove trains individually from the station's many relation:
@@ -192,10 +192,10 @@ alpha.train // => [slow]
 regular.station // => null
 
 
-All relations are persisted. There are no automatic pluralizations of keys,
-even in the many case. Any prototype can define as many one and many relations
-as desired. add() and remove() work even when multiple many relations are
-defined.
+All relations are persisted. There are no automatic pluralizations of
+collection namess, even in the many case. Any prototype can define as many one
+and many relations as desired. add() and remove() work even when multiple many
+relations are defined.
 
 
 
@@ -209,7 +209,7 @@ store with source control systems like svn and git.
 
 WITHOUT PROMPT
 
-If you do not want to start an interactive repl prompt, but want to use a
+If you do not want to start an interactive repl prompt, but want to use an
 odot database from a Node applicaton, use this in your application instead of
 odot.repl():
 
@@ -236,7 +236,7 @@ There are other approaches to quick, in-process databases for Node you should
 consider if you want document-orientatation rather than object-orientation and
 other features like append-only disk logs, including:
 
-* nstore (https://github.com/creationix/nStore)
+* nStore (https://github.com/creationix/nStore)
 * node-dirty (https://github.com/felixge/node-dirty)
 
 
