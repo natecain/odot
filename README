@@ -56,7 +56,7 @@ $ node example/trains.js
 > regular = o.train.regular // Remember to re-reference to get reset state
 > console.log(regular.speed) => 10
 > regular.speed = 15
-> save() // Persists current state of databse (like a commit)
+> save() // Persists current state of database (like a commit)
 > reset() // Resets to the last save point, which was after speed set to 15 
 > regular = o.train.regular
 > console.log(regular.speed) => 15
@@ -108,9 +108,9 @@ odot.repl()
 
 PROTOTYPE SCRIPTS
 
-Prototype scripts define the default varables and functions of prototypes.
-Prototypes undergird all the objects of particular collections in your database. A
-very basic script example (station.js):
+Prototype scripts define the default variables and functions of prototypes.
+Prototypes undergird all the objects of particular collections in your
+database. A very basic script example (station.js):
 
 var mile = 0;  // Set default value of all objects of this prototype to 0
 
@@ -193,7 +193,7 @@ regular.station // => null
 
 
 All relations are persisted. There are no automatic pluralizations of
-collection namess, even in the many case. Any prototype can define as many one
+collection names, even in the many case. Any prototype can define as many one
 and many relations as desired. add() and remove() work even when multiple many
 relations are defined.
 
@@ -210,13 +210,13 @@ store with source control systems like svn and git.
 WITHOUT PROMPT
 
 If you do not want to start an interactive repl prompt, but want to use an
-odot database from a Node applicaton, use this in your application instead of
+odot database from a Node application, use this in your application instead of
 odot.repl():
 
 var o = odot.load();
 
 
-No prompt will appear, but otherwise the API is exacly the same as demonstrated
+No prompt will appear, but otherwise the API is exactly the same as demonstrated
 for the repl interactive prompt.
 
 
@@ -233,7 +233,7 @@ access by other users according to file system permissions.
 OTHER APPROACHES
 
 There are other approaches to quick, in-process databases for Node you should
-consider if you want document-orientatation rather than object-orientation and
+consider if you want document-orientation rather than object-orientation and
 other features like append-only disk logs, including:
 
 * nStore (https://github.com/creationix/nStore)
