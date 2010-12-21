@@ -1,0 +1,3 @@
+0.1.2
+- Add ephemeral() for transient collection object properties
+- Document calculable() for properties that can be set directly or calculated

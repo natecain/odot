@@ -1,16 +1,16 @@
 /*global require */
 
-var nodeo = require('../'),
-    map = nodeo.map;
+var odot = require('../'),
+    map = odot.map;
 
 // console.log(process.argv[1]);
 map('station', 'station.js');
 map('train', 'train.js');
 
-nodeo.repl();
+odot.repl();
 
 // Repl-less usage
-// var o = nodeo.load();
+// var o = odot.load();
 // console.log(o.station.alpha);
 
 

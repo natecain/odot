@@ -1,36 +1,29 @@
 DESCRIPTION
 
-odot is a very simple in-memory object database with dynamic code reloading,
-persistence in a git-friendly format, and an interactive prompt.  The primary
-use is extended exploratory coding with a persistent object space.  The only
-dependency is Node (nodejs.org).
-
-This grew out of some exploratory coding I was doing and turned into something
-that may be useful to people who like to code interactively without
-restarting the Node process or repl and want to preserve the code and data
-being written/manipulated in source and data files suitable for further use.
-Think of it as an interactive prompt along side your code editor wired into
-your code as it is being written.
+odot is exploratory coding using an interactive JavaScript prompt while
+preserving the code you are writing. It has a very simple in-memory object
+database that persists to a git-friendly JSON format between editing sessions.
+It depends only on Node (nodejs.org).
 
 
 
 EXAMPLE
 
-Three files (in example/ directory, see below for explanations):
+Three files (in example/ directory):
 
-trains.js - Script setting up a trains database in interactive mode
-train.js - Script of default vars and functions for train prototype
-station.js - Script of default vars and functions for station prototype
+trainset.js - Defines train set with trains and stations
+train.js - Default values and functions for trains
+station.js - Default values and functions for stations
 
 
 First session:
 
-$ node example/trains.js
+$ node example/trainset.js
 > alpha = new o.Station('alpha')
 > beta = new o.Station('beta')
-> beta.mile = 60 
+> beta.mile = 60  // Override default of 0 set in station.js
 > regular = new o.Train('regular')
-> console.log(regular.speed) => 10 (default specified in train.js))
+> console.log(regular.speed) => 10 // Is default specified in train.js
 > express = new o.Train('express')
 > express.speed = 20 
 > regular.station = alpha // train.js specifies one train->station relation
@@ -44,7 +37,7 @@ $ node example/trains.js
 
 Second session:
 
-$ node example/trains.js
+$ node example/trainset.js
 > // Automatic load of database from o.json file in working directory
 > beta = o.station.beta // or o.station['beta']
 > console.log(beta.distance) => 60 // Data is preserved
@@ -65,7 +58,7 @@ $ node example/trains.js
 
 Third session:
 
-$ node example/trains.js
+$ node example/trainset.js
 > console.log(o.train.regular.speed) => 15
 > <Ctrl-C>
 
@@ -73,24 +66,28 @@ $ node example/trains.js
 
 INSTALLATION
 
-Clone this repository with git or download the latest version using the GitHub
-repository Downloads link. Use as a standard Node module by requiring the
-odot directory.
-
 If you use npm:
 
 npm install odot
 
 
+If you do not use npm, clone this repository or download the latest version
+using the GitHub repository Downloads link. 
+
+
 
 DB SCRIPT
 
-You must write a script to define your database.
+You must write a script to define your database. You launch your interactive
+session by executing this script with Node.
 
 First, import the odot module:
 
-var odot = require('../odot') // Use just 'odot' if installed with npm
+var odot = require('odot')
     map = odot.map;
+
+If you did not install via npm, require your checked out or extracted odot
+directory instead of 'odot'.
 
 
 For each collection in your database, provide the path of a prototype script:
@@ -99,8 +96,8 @@ map('train', 'train.js');
 map('station', 'station.js');
 
 
-Finally, tell Node to load the db and enter the interactive repl prompt (see
-WITHOUT PROMPT for how to use the database without a repl prompt).
+Finally, load the db and enter the interactive repl prompt (see WITHOUT PROMPT
+for how to use the database without a repl prompt).
 
 odot.repl()
 
@@ -110,27 +107,27 @@ PROTOTYPE SCRIPTS
 
 Prototype scripts define the default variables and functions of prototypes.
 Prototypes undergird all the objects of particular collections in your
-database. A very basic script example (station.js):
+database. A very basic example (example/station.js):
 
-var mile = 0;  // Set default value of all objects of this prototype to 0
+var mile = 0;  // Set default value of on station prototype
 
-many('train');  // Create a many relationship with one or more trains
+many('train');  // Create a many relation with trains
 
 function name() { // Custom function for printing out station name
     return 'station ' + this.id + ' at ' + this.mile;
 }
 
 
-All variables and functions defined become those of the prototype. Special
-function calls allow you to setup relations with objects of other collections in the
-database (see RELATIONS below).
+All variables and functions defined become those of the collection prototype.
+Special function calls allow you to setup relations with objects of other
+collections in the database (see RELATIONS below).
 
 Prototype scripts are dynamic. You can continue editing them while the node
 process and/or prompt is up, then, when you want the latest code loaded into
-your node process, use the recode() method. This will load the latest code from
-all your prototype scripts into the prototypes undergirding the objects in your
-database, giving the objects new defaults and behaviors without restarting the
-process.
+your node process, use the recode() (or rc(), alias to same) method. This will
+load the latest code from all your prototype scripts into the prototypes
+undergirding the objects in your database, giving the objects new defaults and
+behaviors without restarting the process.
 
 
 
@@ -138,8 +135,8 @@ RELATIONS
 
 You can manually add functions to your prototype scripts to reference objects
 of other collections in your database. However, since this is a common pattern,
-convenience prototype setup methods are provided to let you define 'one' or
-'many' relations.
+prototype setup methods are provided to let you define 'one' or 'many'
+relations.
 
 For example, in train.js:
 
@@ -199,6 +196,64 @@ relations are defined.
 
 
 
+EPHEMERAL PROPERTIES
+
+If you have properties of a collection's objects you don't want persisted,
+declare them as ephemeral in the prototype script for that collection: 
+
+ephemeral('conductor');
+
+
+In this example from train.js, you can set the name of a conductor on the train
+that is valid for the current process. But once the process is restarted (or
+save() or reset() is called), the conductor property will be null. An example
+real use for this would be an HTTP connection object, which is transient, may
+not be persistable without error,  and won't be useful after you restart the
+process.
+
+
+
+CALCULABLE PROPERTIES
+
+If you have a situation where a property can be derived from other properties
+in an object, but you might also set the property directly, use the
+calculable() prototype script helper method.
+
+Taking the train example, let's say that there is a property of
+weight per car, which is the total train weight divided by the number of cars.
+Sometimes this might be set directly as in:
+
+> regular.wpc = 60 // tons
+
+
+However, for other trains the actual weight and number of cars might be known:
+
+> express.weight = 500 // tons
+> express.cars = 10
+
+
+In this case, the weight per car can be derived by dividing the weight by the
+number of cars. Ideally, in either case, you want the wpc property to return
+the weight per car, whether it is directly set or derived:
+
+> regular.wpc // => 60
+> express.wpc // => 50
+
+
+To do this, create a function in the train prototype script for calculating
+the potentially derivable property and then assign it to a property using the
+calculable() prototype script helper function:
+
+function weightPerCar() {
+    if (this.weight && this.cars) {
+        return this.weight / this.cars;
+    }
+}
+
+calculable('wpc', weightPerCar); // A settable or calculable property
+
+
+
 DB FILE
 
 The database file used to persist the database object state is a simple JSON
@@ -243,4 +298,4 @@ other features like append-only disk logs, including:
 
 FEEDBACK
 
-Feedback welcome at node@thomassmith.com or the Node mailing list.
+Welcome at node@thomassmith.com or the Node mailing list.
