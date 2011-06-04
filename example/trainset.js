@@ -12,5 +12,3 @@ odot.repl();
 // Repl-less usage
 // var o = odot.load();
 // console.log(o.station.alpha);
-
-

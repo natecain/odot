@@ -19,12 +19,12 @@ station.js - Default values and functions for stations
 First session:
 
 $ node example/trainset.js
-> alpha = new o.Station('alpha')
-> beta = new o.Station('beta')
+> alpha = o.Station('alpha')
+> beta = o.Station('beta')
 > beta.mile = 60  // Override default of 0 set in station.js
-> regular = new o.Train('regular')
+> regular = o.Train('regular')
 > console.log(regular.speed) => 10 // Is default specified in train.js
-> express = new o.Train('express')
+> express = o.Train('express')
 > express.speed = 20 
 > regular.station = alpha // train.js specifies one train->station relation
 > express.station = alpha
@@ -146,8 +146,8 @@ one('station')
 Gives all train objects a station member that is transparently set or accessed
 by:
 
-regular = new o.Train('regular')
-alpha = new o.Station('alpha')
+regular = o.Train('regular')
+alpha = o.Station('alpha')
 regular.station = alpha
 regular.station // => alpha
 
@@ -160,9 +160,9 @@ many('train')
 
 Gives all station objects a train member that is an array of train objects:
 
-regular = new o.Train('regular')
-express = new o.Train('express')
-alpha = new o.Station('alpha')
+regular = o.Train('regular')
+express = o.Train('express')
+alpha = o.Station('alpha')
 alpha.train = [regular, express]
 alpha.train // => [regular, express]
 
@@ -172,7 +172,7 @@ call, therefore you can use the full set of array methods on it, but anything
 you do to the array does not affect the actual relations held by the object. To
 add or remove trains individually from the station's many relation:
 
-slow = new o.Train('slow');
+slow = o.Train('slow');
 alpha.add(slow)
 alpha.train // => [regular, express, slow]
 alpha.remove(express)
@@ -251,6 +251,21 @@ function weightPerCar() {
 }
 
 calculable('wpc', weightPerCar); // A settable or calculable property
+
+
+ENTRIES AS PROTOTYPES
+
+To use an existing entry as a prototype, pass it to the entry creation
+function as the second argument:
+
+express = o.Train('express')
+express.speed = 20
+express1 = o.Train('express1', express)
+express1.engineer = 'Alice'
+express2 = o.Train('express2', express)
+express2.engineer = 'Bob'
+
+The database persists and reconstitutes the prototypical inheritance as needed. 
 
 
 
