@@ -146,10 +146,10 @@ one('station')
 Gives all train objects a station member that is transparently set or accessed
 by:
 
-regular = o.Train('regular')
-alpha = o.Station('alpha')
-regular.station = alpha
-regular.station // => alpha
+> regular = o.Train('regular')
+> alpha = o.Station('alpha')
+> regular.station = alpha
+> regular.station // => alpha
 
 
 You can also define a relation to one or more objects of another collection. For
@@ -160,11 +160,11 @@ many('train')
 
 Gives all station objects a train member that is an array of train objects:
 
-regular = o.Train('regular')
-express = o.Train('express')
-alpha = o.Station('alpha')
-alpha.train = [regular, express]
-alpha.train // => [regular, express]
+> regular = o.Train('regular')
+> express = o.Train('express')
+> alpha = o.Station('alpha')
+> alpha.train = [regular, express]
+> alpha.train // => [regular, express]
 
 
 The array returned is a real JavaScript array that is created at the time of
@@ -172,21 +172,21 @@ call, therefore you can use the full set of array methods on it, but anything
 you do to the array does not affect the actual relations held by the object. To
 add or remove trains individually from the station's many relation:
 
-slow = o.Train('slow');
-alpha.add(slow)
-alpha.train // => [regular, express, slow]
-alpha.remove(express)
-alpha.train // => [regular, slow]
+> slow = o.Train('slow');
+> alpha.add(slow)
+> alpha.train // => [regular, express, slow]
+> alpha.remove(express)
+> alpha.train // => [regular, slow]
 
 
 Relationships are not automatically managed bi-directionally, so you must make
 corresponding changes on the other objects if you want the relations to be
 bi-directional: 
 
-alpha.remove(regular) // Removes train from station, but not station from train
-regular.station = null // Totally clears either a one or many relation on train
-alpha.train // => [slow]
-regular.station // => null
+> alpha.remove(regular) // Remove train from station, but not station from train
+> regular.station = null // Totally clear either a one or many relation on train
+> alpha.train // => [slow]
+> regular.station // => null
 
 
 All relations are persisted. There are no automatic pluralizations of
@@ -253,17 +253,19 @@ function weightPerCar() {
 calculable('wpc', weightPerCar); // A settable or calculable property
 
 
-ENTRIES AS PROTOTYPES
 
-To use an existing entry as a prototype, pass it to the entry creation
-function as the second argument:
+OBJECTS AS PROTOTYPES
 
-express = o.Train('express')
-express.speed = 20
-express1 = o.Train('express1', express)
-express1.engineer = 'Alice'
-express2 = o.Train('express2', express)
-express2.engineer = 'Bob'
+To use an existing object as a prototype for another object in the same
+collection, pass it to the creation function as the second argument:
+
+> express = o.Train('express')
+> express.speed = 20
+> express1 = o.Train('express1', express)
+> express1.engineer = 'Alice'
+> express2 = o.Train('express2', express)
+> express2.engineer = 'Bob'
+
 
 The database persists and reconstitutes the prototypical inheritance as needed. 
 
@@ -277,7 +279,7 @@ store with source control systems like svn and git.
 
 
 
-WITHOUT PROMPT
+WITHOUT REPL PROMPT
 
 If you do not want to start an interactive repl prompt, but want to use an
 odot database from a Node application, use this in your application instead of
@@ -288,6 +290,14 @@ var o = odot.load();
 
 No prompt will appear, but otherwise the API is exactly the same as demonstrated
 for the repl interactive prompt.
+
+
+
+LIVE MAPPING
+
+To map a new collection after load() or repl(), use liveMap(). Example:
+
+> liveMap('car', 'car.js');
 
 
 
