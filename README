@@ -1,10 +1,7 @@
 DESCRIPTION
 
-odot is exploratory coding using an interactive JavaScript prompt while
-preserving the code you are writing. It has a very simple in-memory object
-database that persists to a git-friendly JSON format between editing sessions.
-It depends only on Node (nodejs.org).
-
+odot is a persistent, interactive object space with code reloading. It is based
+on Node.
 
 
 EXAMPLE
@@ -295,9 +292,10 @@ for the repl interactive prompt.
 
 LIVE MAPPING
 
-To map a new collection after load() or repl(), use liveMap(). Example:
+You can continue to use map() to add a new collection after load() or repl().
+Example:
 
-> liveMap('car', 'car.js');
+> map('car', 'car.js');
 
 
 

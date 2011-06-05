@@ -1,5 +1,5 @@
 { "name" : "odot",
-  "description" : "persistent, dynamically reloading, interactive object space",
+  "description" : "persistent, code reloading, interactive object space",
   "version" : "0.1.2",
   "author" : "Thomas Smith <node@thomassmith.com>",
   "main" : "./lib",
