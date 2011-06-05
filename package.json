@@ -1,6 +1,6 @@
 { "name" : "odot",
   "description" : "persistent, code reloading, interactive object space",
-  "version" : "0.1.3",
+  "version" : "0.1.4",
   "author" : "Thomas Smith <node@thomassmith.com>",
   "main" : "./lib",
   "engines" : { "node" : ">=0.2.4" }
